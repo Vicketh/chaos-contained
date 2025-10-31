@@ -1,0 +1,35 @@
+name: chaos_contained
+description: "Chaos Contained - ADHD-friendly routine & focus app"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.5
+  dio: ^5.3.2
+  flutter_secure_storage: ^8.0.0
+  provider: ^6.0.5
+  google_fonts: ^6.1.1
+  firebase_core: ^2.13.0
+  firebase_messaging: ^14.3.0
+  intl: ^0.18.0
+  url_launcher: ^6.2.1
+  json_annotation: ^4.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+  # We use Google Fonts package (Poppins/Nunito) instead of bundling font files

@@ -1,0 +1,50 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: chaos
+      POSTGRES_USER: chaosuser
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  django:
+    build: ./backend
+    depends_on:
+      - postgres
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://chaosuser:${POSTGRES_PASSWORD:-changeme}@postgres:5432/chaos
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      FASTAPI_URL: http://fastapi:9000
+    ports:
+      - "8000:8000"
+    command: sh -c "python manage.py migrate && gunicorn chaos_api.wsgi:application --bind 0.0.0.0:8000"
+
+  fastapi:
+    build: ./services/realtime
+    depends_on:
+      - django
+    env_file: .env
+    environment:
+      DJANGO_API_URL: http://django:8000
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    ports:
+      - "9000:9000"
+
+  flutterweb:
+    build:
+      context: ./frontend/chaos_contained
+      args:
+        API_BASE_URL: ${API_BASE_URL-http://localhost:8000/api/v1}
+    depends_on:
+      - django
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:
+
+

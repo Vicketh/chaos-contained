@@ -1,0 +1,56 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.7'
+
+      - name: Flutter pub get
+        working-directory: frontend/chaos_contained
+        run: flutter pub get
+
+      - name: Run tests
+        working-directory: frontend/chaos_contained
+        run: flutter test --coverage
+
+      - name: Build APK (release)
+        working-directory: frontend/chaos_contained
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build apk --release --dart-define=API_BASE_URL=${API_BASE_URL}
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: frontend/chaos_contained/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: frontend/chaos_contained/build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
