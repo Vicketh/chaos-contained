@@ -46,10 +46,19 @@ jobs:
           name: app-release.apk
           path: frontend/chaos_contained/build/app/outputs/flutter-apk/app-release.apk
 
+      - name: Generate latest_release.json
+        id: genmeta
+        run: |
+          TAG=${GITHUB_REF_NAME}
+          DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo "{\"tag_name\":\"$TAG\",\"published_at\":\"$DATE\",\"apk_asset_name\":\"app-release.apk\"}" > latest_release.json
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: frontend/chaos_contained/build/app/outputs/flutter-apk/app-release.apk
+          files: |
+            frontend/chaos_contained/build/app/outputs/flutter-apk/app-release.apk
+            latest_release.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
